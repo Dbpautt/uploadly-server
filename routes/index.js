@@ -5,11 +5,7 @@ const router = express.Router();
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-  const data = {
-    name: 'uploadly API',
-    version: 'v1.0'
-  };
-  res.json(data);
+  res.json({ title: 'Welcome to the uploadly API' });
 });
 
 module.exports = router;
