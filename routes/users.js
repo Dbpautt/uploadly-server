@@ -1,12 +1,18 @@
 'use strict';
 
 const express = require('express');
+const bcrypt = require('bcrypt');
 const router = express.Router();
 
 const User = require('../models/user');
 
 router.get('/', (req, res, next) => {
-  User.find({})
+  const currentUser = req.session.currentUser;
+  if (!currentUser || currentUser.role !== 'admin') {
+    return res.status(401).json({ code: 'unauthorized' });
+  }
+
+  User.find({ createdBy: currentUser._id })
     .then((users) => {
       res.json(users);
     })
@@ -14,15 +20,38 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', (req, res, next) => {
-  if (!req.body.username || !req.body.password) {
+  const currentUser = req.session.currentUser;
+  if (!currentUser || currentUser.role !== 'admin') {
+    return res.status(401).json({ code: 'unauthorized' });
+  }
+
+  const { username, password } = req.body;
+
+  if (!username || !password) {
     return res.status(422).json({ code: 'validation error' });
   }
 
-  const user = new User(req.body);
+  User.findOne({ username }, 'username')
+    .then((userExists) => {
+      if (userExists) {
+        return res.status(409).json({ code: 'conflict' });
+      }
 
-  user.save()
-    .then(() => {
-      res.json(user);
+      const salt = bcrypt.genSaltSync(10);
+      const hashPass = bcrypt.hashSync(password, salt);
+
+      const data = {
+        username,
+        password: hashPass,
+        createdBy: currentUser._id,
+        role: 'user'
+      };
+
+      const user = new User(data);
+      return user.save()
+        .then(() => {
+          res.json(user);
+        });
     })
     .catch(next);
 });

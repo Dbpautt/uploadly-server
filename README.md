@@ -102,6 +102,14 @@ Notifications:
   - user.create(data)
   - user.profile(id)
 
+## Guards
+
+- initAuth - always authorize
+- requireAnon - only authorize if !user, redirect to / otherwise
+- requireUser - only authorize if user && user.role === 'user', redirect to / otherwise
+- requireAdmin - only authorize if user && user.role === 'admin', redirect to / otherwise
+
+
 # Server
 
 ## Models
@@ -142,13 +150,12 @@ type - String [enum: 'contract', 'proposal', 'presentation', 'survey']
   - body:
     - username
     - password
-- POST /user/create
+- POST /user
  - requires admin
  - body:
     - username
     - password
-    - admin id
-    - created on
+  - validate user is unique (409)
   - create user
   - returns user
 - GET /user

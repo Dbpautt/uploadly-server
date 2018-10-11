@@ -56,7 +56,7 @@ router.post('/signup', (req, res, next) => {
   User.findOne({ username }, 'username')
     .then((userExists) => {
       if (userExists) {
-        return res.status(422).json({ code: 'username-not-unique' });
+        return res.status(409).json({ code: 'conflict' });
       }
 
       const salt = bcrypt.genSaltSync(10);
@@ -64,7 +64,8 @@ router.post('/signup', (req, res, next) => {
 
       const newUser = User({
         username,
-        password: hashPass
+        password: hashPass,
+        role: 'admin'
       });
 
       return newUser.save()

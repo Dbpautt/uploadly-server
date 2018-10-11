@@ -12,7 +12,14 @@ mongoose.connect('mongodb://localhost/uploadlydb')
   })
   .then(() => {
     console.log('Empty db');
-    return User.insertMany(data);
+    return User.insertMany(data.admins);
+  })
+  .then((admins) => {
+    console.log('You have some admins', admins.length);
+    data.users.forEach(user => {
+      user.createdBy = admins[user.createdBy]._id;
+    });
+    return User.insertMany(data.users);
   })
   .then((results) => {
     console.log('You have some users', results.length);
