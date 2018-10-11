@@ -14,8 +14,8 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', (req, res, next) => {
-  if (!req.body.name || !req.body.level) {
-    res.status(422).json({ code: 'validation error' });
+  if (!req.body.username || !req.body.password) {
+    return res.status(422).json({ code: 'validation error' });
   }
 
   const user = new User(req.body);

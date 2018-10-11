@@ -34,9 +34,9 @@ router.post('/login', (req, res, next) => {
       if (bcrypt.compareSync(password, user.password)) {
         req.session.currentUser = user;
         return res.json(user);
-      } else {
-        return res.status(404).json({ code: 'not-found' });
       }
+
+      return res.status(404).json({ code: 'not-found' });
     })
     .catch(next);
 });
@@ -78,7 +78,7 @@ router.post('/signup', (req, res, next) => {
 
 router.post('/logout', (req, res) => {
   req.session.currentUser = null;
-  return res.status(204).send();
+  res.status(204).send();
 });
 
 module.exports = router;
