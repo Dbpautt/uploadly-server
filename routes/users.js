@@ -19,6 +19,20 @@ router.get('/', (req, res, next) => {
     .catch(next);
 });
 
+router.get('/:id', (req, res, next) => {
+  const currentUser = req.session.currentUser;
+  if (!currentUser || currentUser.role !== 'admin') {
+    return res.status(401).json({ code: 'unauthorized' });
+  }
+  const id = req.params.id;
+
+  User.findOne({ _id: id })
+    .then((users) => {
+      res.json(users);
+    })
+    .catch(next);
+});
+
 router.post('/', (req, res, next) => {
   const currentUser = req.session.currentUser;
   if (!currentUser || currentUser.role !== 'admin') {
