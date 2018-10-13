@@ -9,10 +9,12 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const cloudinary = require('cloudinary').v2;
 
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users');
+const documentsRouter = require('./routes/documents');
 
 const app = express();
 
@@ -54,13 +56,12 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 
-// catch 404 and forward to error handler
+app.use('/documents/', documentsRouter);
 app.use((req, res, next) => {
   res.status(404).json({ code: 'not found' });
 });
 
 app.use((err, req, res, next) => {
-  // always log the error
   console.error('ERROR', req.method, req.path, err);
 
   // only render if the error ocurred before sending the response

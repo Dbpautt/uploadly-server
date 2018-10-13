@@ -1,12 +1,13 @@
 'use strict';
 
 const express = require('express');
-const bcrypt = require('bcrypt');
 const router = express.Router();
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
-const Documents = require('../models/documents');
+const uploadCloud = require('../configs/cloudinary.js');
+
+const Documents = require('../models/document');
 
 router.get('/', (req, res, next) => {
   const currentUser = req.session.currentUser;
@@ -40,41 +41,56 @@ router.get('/:id', (req, res, next) => {
     .catch(next);
 });
 
-router.post('/', (req, res, next) => {
-  const currentUser = req.session.currentUser;
-  if (!currentUser || currentUser.role !== 'admin') {
-    return res.status(401).json({ code: 'unauthorized' });
-  }
+// router.post('/', (req, res, next) => {
+//   const currentUser = req.session.currentUser;
+//   if (!currentUser || currentUser.role !== 'admin') {
+//     return res.status(401).json({ code: 'unauthorized' });
+//   }
 
-  const { username, password } = req.body;
+router.post('/', uploadCloud.single('file'), function (req, res, next) {
+  const document = new Document({
+    name: req.body.name,
+    document: req.file.url
+  });
 
-  if (!username || !password) {
-    return res.status(422).json({ code: 'validation error' });
-  }
-
-  Documents.findOne({ username }, 'username')
-    .then((documentExists) => {
-      if (documentExists) {
-        return res.status(409).json({ code: 'conflict' });
-      }
-
-      const salt = bcrypt.genSaltSync(10);
-      const hashPass = bcrypt.hashSync(password, salt);
-
-      const data = {
-        username,
-        password: hashPass,
-        createdBy: currentUser._id,
-        role: 'user'
-      };
-
-      const document = new Document(data);
-      return document.save()
-        .then(() => {
-          res.json(document);
-        });
-    })
-    .catch(next);
+  document.save((err) => {
+    if (err) return res.json(err);
+    return res.json({
+      message: 'New document created!',
+      document: document
+    });
+  });
 });
+
+// const { username, password } = req.body;
+
+// if (!username || !password) {
+//   return res.status(422).json({ code: 'validation error' });
+// }
+
+// Documents.findOne({ username }, 'username')
+//   .then((documentExists) => {
+//     if (documentExists) {
+//       return res.status(409).json({ code: 'conflict' });
+//     }
+
+//       const salt = bcrypt.genSaltSync(10);
+//       const hashPass = bcrypt.hashSync(password, salt);
+
+//       const data = {
+//         username,
+//         password: hashPass,
+//         createdBy: currentUser._id,
+//         role: 'user'
+//       };
+
+//       const document = new Document(data);
+//       return document.save()
+//         .then(() => {
+//           res.json(document);
+//         });
+//     })
+//     .catch(next);
+// });
 
 module.exports = router;
