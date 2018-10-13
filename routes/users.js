@@ -13,6 +13,7 @@ router.get('/', (req, res, next) => {
   }
 
   User.find({ createdBy: currentUser._id })
+    .populate('createdBy')
     .then((users) => {
       res.json(users);
     })
