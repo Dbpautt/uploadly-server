@@ -6,7 +6,7 @@ const documents = [{
   name: 'NDA',
   description: 'Read this, bitch',
   type: 'Contract',
-  document: 'https://res.cloudinary.com/drtjvxqyi/image/upload/v1539441337/samplecontract.pdf'
+  file: 'https://res.cloudinary.com/drtjvxqyi/image/upload/v1539441337/samplecontract.pdf'
 },
 {
   recipient: 'user2',
@@ -14,7 +14,7 @@ const documents = [{
   name: 'Supplier Agreement',
   description: 'We hate contracts, too',
   type: 'Contract',
-  document: 'https://res.cloudinary.com/drtjvxqyi/image/upload/v1539442512/agreement.pdf'
+  file: 'https://res.cloudinary.com/drtjvxqyi/image/upload/v1539442512/agreement.pdf'
 },
 {
   recipient: 'majo',
@@ -22,7 +22,7 @@ const documents = [{
   name: 'Presentation on life',
   description: 'Because we can',
   type: 'Presentation',
-  document: 'https://res.cloudinary.com/drtjvxqyi/image/upload/v1539441408/Productlifecycle.pdf'
+  file: 'https://res.cloudinary.com/drtjvxqyi/image/upload/v1539441408/Productlifecycle.pdf'
 },
 {
   recipient: 'majo1',
@@ -30,7 +30,7 @@ const documents = [{
   name: 'Proposal',
   description: 'Life is good',
   type: 'Contract',
-  document: 'https://res.cloudinary.com/drtjvxqyi/image/upload/v1539441337/samplecontract.pdf'
+  file: 'https://res.cloudinary.com/drtjvxqyi/image/upload/v1539441337/samplecontract.pdf'
 }];
 
 module.exports = documents;

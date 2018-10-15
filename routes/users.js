@@ -7,7 +7,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 const uploadCloud = require('../configs/cloudinary.js');
 
-const Documents = require('../models/document');
+const Document = require('../models/document');
 const User = require('../models/user');
 
 router.get('/', (req, res, next) => {
@@ -20,31 +20,6 @@ router.get('/', (req, res, next) => {
     .populate('createdBy')
     .then((users) => {
       res.json(users);
-    })
-    .catch(next);
-});
-
-router.get('/:id', (req, res, next) => {
-  const currentUser = req.session.currentUser;
-  if (!currentUser || currentUser.role !== 'admin') {
-    return res.status(401).json({ code: 'unauthorized' });
-  }
-  const id = req.params.id;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-
-  User.findOne({
-    $and: [ { createdBy: currentUser._id }, { _id: id } ]
-  })
-    .then((user) => {
-      Documents.find({ recipient: user._id })
-        .populate('uploadedBy')
-        .populate('recipient')
-        .then((documents) => {
-          res.json(documents);
-        });
     })
     .catch(next);
 });
@@ -97,18 +72,21 @@ router.get('/:id', (req, res, next) => {
     return next();
   }
 
-  Documents.findOne({ _id: id })
-    .then((documents) => {
-      if (documents) {
-        res.json(documents);
-      } else {
-        return res.status(404).json({ code: 'document not found' });
-      }
+  User.findOne({
+    $and: [ { createdBy: currentUser._id }, { _id: id } ]
+  })
+    .then((user) => {
+      Document.find({ recipient: user._id })
+        .populate('recipient')
+        .populate('uploadedBy')
+        .then((documents) => {
+          res.json(documents);
+        });
     })
     .catch(next);
 });
 
-router.post('/', uploadCloud.single('file'), (req, res, next) => {
+router.post('/:id/document/create', uploadCloud.single('file'), (req, res, next) => {
   const currentUser = req.session.currentUser;
   if (!currentUser || currentUser.role !== 'admin') {
     return res.status(401).json({ code: 'unauthorized' });
@@ -118,7 +96,9 @@ router.post('/', uploadCloud.single('file'), (req, res, next) => {
   if (!ObjectId.isValid(id)) {
     return next();
   }
-
+  User.findOne({
+    $and: [ { createdBy: currentUser._id }, { _id: id } ]
+  });
   const file = req.file.url;
   const salt = bcrypt.genSaltSync(10);
   const hashDoc = bcrypt.hashSync(file, salt);
@@ -132,7 +112,7 @@ router.post('/', uploadCloud.single('file'), (req, res, next) => {
     file: hashDoc
   };
 
-  const document = new Documents(data);
+  const document = new Document(data);
   return document.save()
     .then(() => {
       res.json(document);
