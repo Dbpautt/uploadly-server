@@ -1,5 +1,6 @@
 'use strict';
 
+const bcrypt = require('bcrypt');
 const express = require('express');
 const router = express.Router();
 
@@ -34,63 +35,51 @@ router.get('/:id', (req, res, next) => {
   }
   const id = req.params.id;
 
+  if (!ObjectId.isValid(id)) {
+    return next();
+  }
+
   Documents.findOne({ _id: id })
     .then((documents) => {
-      res.json(documents);
+      if (documents) {
+        res.json(documents);
+      } else {
+        return res.status(404).json({ code: 'document not found' });
+      }
     })
     .catch(next);
 });
 
-// router.post('/', (req, res, next) => {
-//   const currentUser = req.session.currentUser;
-//   if (!currentUser || currentUser.role !== 'admin') {
-//     return res.status(401).json({ code: 'unauthorized' });
-//   }
+router.post('/', uploadCloud.single('file'), (req, res, next) => {
+  const currentUser = req.session.currentUser;
+  if (!currentUser || currentUser.role !== 'admin') {
+    return res.status(401).json({ code: 'unauthorized' });
+  }
+  const id = req.params.id;
 
-router.post('/', uploadCloud.single('file'), function (req, res, next) {
-  const document = new Document({
+  if (!ObjectId.isValid(id)) {
+    return next();
+  }
+
+  const file = req.file.url;
+  const salt = bcrypt.genSaltSync(10);
+  const hashDoc = bcrypt.hashSync(file, salt);
+
+  const data = {
+    recipient: req.body.recipient,
+    uploadedBy: req.body.currentUser,
     name: req.body.name,
-    document: req.file.url
-  });
+    description: req.body.description,
+    type: req.body.type,
+    file: hashDoc
+  };
 
-  document.save((err) => {
-    if (err) return res.json(err);
-    return res.json({
-      message: 'New document created!',
-      document: document
-    });
-  });
+  const document = new Documents(data);
+  return document.save()
+    .then(() => {
+      res.json(document);
+    })
+    .catch(next);
 });
-
-// const { username, password } = req.body;
-
-// if (!username || !password) {
-//   return res.status(422).json({ code: 'validation error' });
-// }
-
-// Documents.findOne({ username }, 'username')
-//   .then((documentExists) => {
-//     if (documentExists) {
-//       return res.status(409).json({ code: 'conflict' });
-//     }
-
-//       const salt = bcrypt.genSaltSync(10);
-//       const hashPass = bcrypt.hashSync(password, salt);
-
-//       const data = {
-//         username,
-//         password: hashPass,
-//         createdBy: currentUser._id,
-//         role: 'user'
-//       };
-
-//       const document = new Document(data);
-//       return document.save()
-//         .then(() => {
-//           res.json(document);
-//         });
-//     })
-//     .catch(next);
-// });
 
 module.exports = router;

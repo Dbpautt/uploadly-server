@@ -27,7 +27,9 @@ router.get('/:id', (req, res, next) => {
   }
   const id = req.params.id;
 
-  User.findOne({ _id: id })
+  User.findOne({
+    $and: [ { createdBy: currentUser._id }, { _id: id } ]
+  })
     .then((users) => {
       res.json(users);
     })

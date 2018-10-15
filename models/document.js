@@ -26,7 +26,12 @@ const documentSchema = new Schema({
   type: {
     type: String,
     enum: ['Contract', 'Proposal', 'Presentation', 'Survey', 'Other']
+  },
+  file: {
+    type: String,
+    required: true
   }
+
 });
 
 const Document = mongoose.model('Document', documentSchema);

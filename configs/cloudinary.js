@@ -1,5 +1,6 @@
 'use strict';
 
+require('dotenv').config();
 const cloudinary = require('cloudinary');
 const cloudinaryStorage = require('multer-storage-cloudinary');
 const multer = require('multer');
@@ -7,12 +8,12 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 cloudinary.config({
-  cloud_name: 'drtjvxqyi',
-  api_key: '729837836316418',
-  api_secret: '9b6e0mkfwqFo3TKrbdAtiKuuyC8'
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-var storage = cloudinaryStorage({
+const storage = cloudinaryStorage({
   cloudinary: cloudinary,
   folder: 'uploadly',
   allowedFormats: ['pdf', 'jpg', 'png'],
