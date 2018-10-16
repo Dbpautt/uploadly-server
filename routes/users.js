@@ -61,7 +61,7 @@ router.post('/', (req, res, next) => {
     .catch(next);
 });
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id/documents', (req, res, next) => {
   const currentUser = req.session.currentUser;
   if (!currentUser || currentUser.role !== 'admin') {
     return res.status(401).json({ code: 'unauthorized' });
@@ -76,7 +76,10 @@ router.get('/:id', (req, res, next) => {
     $and: [ { createdBy: currentUser._id }, { _id: id } ]
   })
     .then((user) => {
-      Document.find({ recipient: user._id })
+      if (!user) {
+        return res.status(404).json({ code: 'not-found' });
+      }
+      return Document.find({ recipient: user._id })
         .populate('recipient')
         .populate('uploadedBy')
         .then((documents) => {
@@ -86,7 +89,7 @@ router.get('/:id', (req, res, next) => {
     .catch(next);
 });
 
-router.post('/:id/document/create', uploadCloud.single('file'), (req, res, next) => {
+router.post('/:id/documents/create', uploadCloud.single('file'), (req, res, next) => {
   const currentUser = req.session.currentUser;
   if (!currentUser || currentUser.role !== 'admin') {
     return res.status(401).json({ code: 'unauthorized' });

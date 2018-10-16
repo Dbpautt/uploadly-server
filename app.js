@@ -12,6 +12,7 @@ const MongoStore = require('connect-mongo')(session);
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users');
+const profileRouter = require('./routes/profile');
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use((req, res, next) => {
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
+app.use('/profile', profileRouter);
 
 app.use((req, res, next) => {
   res.status(404).json({ code: 'not found' });
