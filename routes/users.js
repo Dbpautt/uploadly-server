@@ -100,16 +100,16 @@ router.post('/:id/document/create', uploadCloud.single('file'), (req, res, next)
     $and: [ { createdBy: currentUser._id }, { _id: id } ]
   });
   const file = req.file.url;
-  const salt = bcrypt.genSaltSync(10);
-  const hashDoc = bcrypt.hashSync(file, salt);
+  // const salt = bcrypt.genSaltSync(10);
+  // const hashDoc = bcrypt.hashSync(file, salt);
 
   const data = {
-    recipient: req.body.recipient,
-    uploadedBy: req.body.currentUser,
+    recipient: req.params.id,
+    uploadedBy: req.body.uploadedBy,
     name: req.body.name,
     description: req.body.description,
     type: req.body.type,
-    file: hashDoc
+    file: file
   };
 
   const document = new Document(data);
