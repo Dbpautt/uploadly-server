@@ -125,31 +125,32 @@ router.post('/:id/document/create', uploadCloud.single('file'), (req, res, next)
     .catch(next);
 });
 
-router.get('/:id/document/:docid', (req, res, next) => {
+router.get('/:userid/document/:docid', (req, res, next) => {
   const currentUser = req.session.currentUser;
   if (!currentUser || currentUser.role !== 'admin') {
     return res.status(401).json({ code: 'unauthorized' });
   }
   const docid = req.params.docid;
-  const id = req.params.userid;
+  const userid = req.params.userid;
 
-  if (!ObjectId.isValid(id, docid)) {
+  if (!ObjectId.isValid(userid)) {
+    return next();
+  }
+  if (!ObjectId.isValid(docid)) {
     return next();
   }
 
   Document.findOne({
-    $and: [ { createdBy: id }, { _id: docid } ]
+    $and: [ { recipient: userid }, { _id: docid } ]
   })
+    .populate('recipient')
+    .populate('uploadedBy')
     .then((document) => {
+      console.log(document);
       if (!document) {
         return res.status(404).json({ code: 'not-found' });
       }
-      return Document.find({ recipient: user._id })
-        .populate('recipient')
-        .populate('uploadedBy')
-        .then((documents) => {
-          res.json(documents);
-        });
+      res.json(document);
     })
     .catch(next);
 });
