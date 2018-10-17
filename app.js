@@ -14,6 +14,8 @@ const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users');
 const profileRouter = require('./routes/profile');
 
+// -- create app, connect to db
+
 const app = express();
 
 mongoose.connect(process.env.MONGODB_URI, {
@@ -22,14 +24,17 @@ mongoose.connect(process.env.MONGODB_URI, {
   reconnectTries: Number.MAX_VALUE
 });
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+// -- midlewares
+
 app.use(cors({
   credentials: true,
   origin: [process.env.CLIENT_URI]
 }));
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use(session({
   store: new MongoStore({
@@ -44,15 +49,14 @@ app.use(session({
   }
 }));
 
-app.use((req, res, next) => {
-  app.locals.currentUser = req.session.currentUser;
-  next();
-});
+// -- routes
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/profile', profileRouter);
+
+// -- error handlers
 
 app.use((req, res, next) => {
   res.status(404).json({ code: 'not found' });

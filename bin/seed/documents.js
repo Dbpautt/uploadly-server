@@ -1,5 +1,6 @@
 'use strict';
 
+require('dotenv').config();
 const mongoose = require('mongoose');
 
 const Documents = require('../../models/document.js');
@@ -21,7 +22,7 @@ function updateRecipientId (document) {
   return Promise.all(promisesOfUpdatingRecipientId);
 }
 
-mongoose.connect('mongodb://localhost/uploadlydb')
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to Mongo!');
     return Documents.remove({});

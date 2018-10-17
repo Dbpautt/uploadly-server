@@ -1,11 +1,12 @@
 'use strict';
 
+require('dotenv').config();
 const mongoose = require('mongoose');
 
 const User = require('../../models/user.js');
 const data = require('../../data/users.js');
 
-mongoose.connect('mongodb://localhost/uploadlydb')
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to Mongo!');
     return User.remove({});
