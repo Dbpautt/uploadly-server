@@ -61,7 +61,7 @@ router.post('/', (req, res, next) => {
     .catch(next);
 });
 
-router.get('/:id/documents', (req, res, next) => {
+router.get('/:id/document', (req, res, next) => {
   const currentUser = req.session.currentUser;
   if (!currentUser || currentUser.role !== 'admin') {
     return res.status(401).json({ code: 'unauthorized' });
@@ -89,7 +89,7 @@ router.get('/:id/documents', (req, res, next) => {
     .catch(next);
 });
 
-router.post('/:id/documents/create', uploadCloud.single('file'), (req, res, next) => {
+router.post('/:id/document/create', uploadCloud.single('file'), (req, res, next) => {
   const currentUser = req.session.currentUser;
   if (!currentUser || currentUser.role !== 'admin') {
     return res.status(401).json({ code: 'unauthorized' });
