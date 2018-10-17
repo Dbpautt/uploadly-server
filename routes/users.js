@@ -103,8 +103,10 @@ router.post('/:id/document/create', uploadCloud.single('file'), (req, res, next)
     $and: [ { createdBy: currentUser._id }, { _id: id } ]
   });
   const file = req.file.url;
-  // const salt = bcrypt.genSaltSync(10);
-  // const hashDoc = bcrypt.hashSync(file, salt);
+
+  const httpArray = file.split(':');
+  httpArray[0] = 'https';
+  const secureFile = httpArray.join(':');
 
   const data = {
     recipient: req.params.id,
@@ -112,13 +114,42 @@ router.post('/:id/document/create', uploadCloud.single('file'), (req, res, next)
     name: req.body.name,
     description: req.body.description,
     type: req.body.type,
-    file: file
+    file: secureFile
   };
 
   const document = new Document(data);
   return document.save()
     .then(() => {
       res.json(document);
+    })
+    .catch(next);
+});
+
+router.get('/:id/document/:docid', (req, res, next) => {
+  const currentUser = req.session.currentUser;
+  if (!currentUser || currentUser.role !== 'admin') {
+    return res.status(401).json({ code: 'unauthorized' });
+  }
+  const docid = req.params.docid;
+  const id = req.params.userid;
+
+  if (!ObjectId.isValid(id, docid)) {
+    return next();
+  }
+
+  Document.findOne({
+    $and: [ { createdBy: id }, { _id: docid } ]
+  })
+    .then((document) => {
+      if (!document) {
+        return res.status(404).json({ code: 'not-found' });
+      }
+      return Document.find({ recipient: user._id })
+        .populate('recipient')
+        .populate('uploadedBy')
+        .then((documents) => {
+          res.json(documents);
+        });
     })
     .catch(next);
 });
