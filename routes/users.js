@@ -9,6 +9,7 @@ const uploadCloud = require('../configs/cloudinary.js');
 
 const Document = require('../models/document');
 const User = require('../models/user');
+const helperRandom = require('../helpers/random');
 
 router.get('/', (req, res, next) => {
   const currentUser = req.session.currentUser;
@@ -24,6 +25,29 @@ router.get('/', (req, res, next) => {
     .catch(next);
 });
 
+router.get('/:id', (req, res, next) => {
+  const currentUser = req.session.currentUser;
+  if (!currentUser || currentUser.role !== 'admin') {
+    return res.status(401).json({ code: 'unauthorized' });
+  }
+  const id = req.params.id;
+
+  if (!ObjectId.isValid(id)) {
+    return next();
+  }
+
+  User.findOne({
+    $and: [ { createdBy: currentUser._id }, { _id: id } ]
+  })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({ code: 'not-found' });
+      }
+      res.json(user);
+    })
+    .catch(next);
+});
+
 router.post('/', (req, res, next) => {
   const currentUser = req.session.currentUser;
   if (!currentUser || currentUser.role !== 'admin') {
@@ -31,6 +55,7 @@ router.post('/', (req, res, next) => {
   }
 
   const { username, password } = req.body;
+  const color = helperRandom.getRandomColor();
 
   if (!username || !password) {
     return res.status(422).json({ code: 'validation error' });
@@ -49,7 +74,8 @@ router.post('/', (req, res, next) => {
         username,
         password: hashPass,
         createdBy: currentUser._id,
-        role: 'user'
+        role: 'user',
+        color
       };
 
       const user = new User(data);

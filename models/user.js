@@ -21,6 +21,10 @@ const userSchema = new Schema({
   createdBy: {
     type: ObjectId,
     ref: 'User'
+  },
+  color: {
+    type: String,
+    required: false
   }
 });
 
